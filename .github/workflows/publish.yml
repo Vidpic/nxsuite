@@ -3,7 +3,7 @@ name: Publish to PyPI
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'v*.*.*'  # Adjust this pattern if your tags follow a different format
 
 jobs:
   build_and_publish:
@@ -25,8 +25,8 @@ jobs:
         
       - name: Clean previous builds
         run: |
-          rmdir /s /q *.egg-info
-          if exist dist rmdir /s /q dist
+          Remove-Item -Recurse -Force *.egg-info
+          if (Test-Path dist) { Remove-Item -Recurse -Force dist }
           
       - name: Build hactool
         run: |
