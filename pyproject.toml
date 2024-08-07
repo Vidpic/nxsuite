@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nxsuite"
-version = "0.1.1"
+version = "0.1.0"
 authors = [{ name = "Vidpic" }]
 description = "NXSuite is a tool for editing various Nintendo Switch file formats."
 readme = "README.md"
@@ -19,6 +19,7 @@ classifiers = [
 
 [project.urls]
 Repository = "https://github.com/Vidpic/nxsuite"
+Issues = "https://github.com/Vidpic/nxsuite/issues"
 
 [tool.setuptools.packages.find]
 exclude = ["hactool", "hacpack"]
