@@ -1,0 +1,50 @@
+name: Publish to PyPI
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build_and_publish:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+        
+      - name: Clean previous builds
+        run: |
+          rmdir /s /q *.egg-info
+          if exist dist rmdir /s /q dist
+          
+      - name: Build hactool
+        run: |
+          cd hactool
+          make all
+          
+      - name: Build hacpack
+        run: |
+          cd hacpack
+          make all
+          
+      - name: Build nxsuite
+        run: |
+          python -m build
+        
+      - name: Publish package
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          python -m twine upload --repository pypi dist/*
