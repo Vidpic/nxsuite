@@ -13,10 +13,10 @@
 #include <string.h>
 
 __declspec(dllexport) _Bool
-    program_nca(const char *prodkeys, const char *sdk_version,
-                const char *key_generation, const char *title_id,
-                const char *exefs, const char *romfs, const char *logo,
-                const char *out_dir) {
+program_nca(const char *exefs, const char *romfs, const char *logo,
+            const char *out_dir, const char *sdk_version,
+            const char *key_generation, const char *title_id, const char *prodkeys)
+{
   hp_settings_t settings;
   memset(&settings, 0, sizeof(settings));
 
@@ -81,12 +81,15 @@ __declspec(dllexport) _Bool
     keyfile = os_fopen(keypath.os_path, OS_MODE_READ);
 
   // Try to populate keyfile.
-  if (keyfile != NULL) {
+  if (keyfile != NULL)
+  {
     printf("Loading '%s' keyset file\n", keypath.char_path);
     extkeys_initialize_keyset(&settings.keyset, keyfile);
     pki_derive_keys(&settings.keyset);
     fclose(keyfile);
-  } else {
+  }
+  else
+  {
     printf("\n");
     fprintf(stderr, "Error: Unable to open keyset file\n");
     return EXIT_FAILURE;
@@ -95,7 +98,8 @@ __declspec(dllexport) _Bool
   // SDK Version
   settings.sdk_version = strtoul(sdk_version, NULL, 16);
   // Validating SDK Version
-  if (settings.sdk_version < 0x000B0000) {
+  if (settings.sdk_version < 0x000B0000)
+  {
     fprintf(stderr,
             "Error: Invalid SDK version: %08" PRIX32 "\n"
             "SDK version must be equal or greater than: 000B0000\n",
@@ -106,7 +110,8 @@ __declspec(dllexport) _Bool
   // Keygeneration
   settings.keygeneration = atoi(key_generation);
   // Validating Keygeneration
-  if (settings.keygeneration < 1 || settings.keygeneration > 32) {
+  if (settings.keygeneration < 1 || settings.keygeneration > 32)
+  {
     fprintf(stderr, "Invalid keygeneration: %i, keygeneration range: 1-32\n",
             settings.keygeneration);
     return EXIT_FAILURE;
@@ -117,27 +122,33 @@ __declspec(dllexport) _Bool
 
   // Make sure that header_key exists
   uint8_t has_header_Key = 0;
-  for (unsigned int i = 0; i < 0x10; i++) {
-    if (settings.keyset.header_key[i] != 0) {
+  for (unsigned int i = 0; i < 0x10; i++)
+  {
+    if (settings.keyset.header_key[i] != 0)
+    {
       has_header_Key = 1;
       break;
     }
   }
-  if (has_header_Key == 0) {
+  if (has_header_Key == 0)
+  {
     fprintf(stderr, "Error: header_key is not present in keyset file\n");
     return EXIT_FAILURE;
   }
 
   // Make sure that key_area_key_application_keygen exists
   uint8_t has_kek = 0;
-  for (unsigned int kekc = 0; kekc < 0x10; kekc++) {
+  for (unsigned int kekc = 0; kekc < 0x10; kekc++)
+  {
     if (settings.keyset.key_area_keys[settings.keygeneration - 1][0][kekc] !=
-        0) {
+        0)
+    {
       has_kek = 1;
       break;
     }
   }
-  if (has_kek == 0) {
+  if (has_kek == 0)
+  {
     fprintf(stderr,
             "Error: key_area_key_application for keygeneration %i is not "
             "present in keyset file\n",
@@ -146,15 +157,19 @@ __declspec(dllexport) _Bool
   }
 
   // Make sure that titlekek_keygen exists if titlekey is specified
-  if (settings.has_title_key == 1) {
+  if (settings.has_title_key == 1)
+  {
     uint8_t has_titlekek = 0;
-    for (unsigned int tkekc = 0; tkekc < 0x10; tkekc++) {
-      if (settings.keyset.titlekeks[settings.keygeneration - 1][tkekc] != 0) {
+    for (unsigned int tkekc = 0; tkekc < 0x10; tkekc++)
+    {
+      if (settings.keyset.titlekeks[settings.keygeneration - 1][tkekc] != 0)
+      {
         has_titlekek = 1;
         break;
       }
     }
-    if (has_titlekek == 0) {
+    if (has_titlekek == 0)
+    {
       fprintf(stderr,
               "Error: titlekek for keygeneration %i is not present in keyset "
               "file\n",
@@ -164,7 +179,8 @@ __declspec(dllexport) _Bool
   }
 
   // Make sure that titleid is within valid range
-  if (settings.title_id < 0x0100000000000000) {
+  if (settings.title_id < 0x0100000000000000)
+  {
     fprintf(stderr,
             "Error: Bad TitleID: %016" PRIx64 "\n"
             "Valid TitleID range: 0100000000000000 - ffffffffffffffff\n",
@@ -176,11 +192,13 @@ __declspec(dllexport) _Bool
            settings.title_id);
 
   // Make sure that outout directory is set
-  if (settings.out_dir.valid == VALIDITY_INVALID) {
+  if (settings.out_dir.valid == VALIDITY_INVALID)
+  {
     fprintf(stderr, "Error: Output directory is not specified");
   }
 
-  if (settings.file_type == FILE_TYPE_NCA) {
+  if (settings.file_type == FILE_TYPE_NCA)
+  {
     // Remove existing temp directory and create a new one
     printf("Removing existing temp directory\n");
     filepath_remove_directory(&settings.temp_dir);
@@ -201,12 +219,15 @@ __declspec(dllexport) _Bool
 
   printf("\n");
 
-  if (settings.exefs_dir.valid == VALIDITY_INVALID) {
+  if (settings.exefs_dir.valid == VALIDITY_INVALID)
+  {
     fprintf(stderr, "Error: exefs filepath is not set\n");
-  } else if (((settings.nca_sig2_private_key.valid == VALIDITY_VALID) &&
-              (settings.nca_sig2_modulus.valid == VALIDITY_INVALID)) ||
-             ((settings.nca_sig2_private_key.valid == VALIDITY_INVALID) &&
-              (settings.nca_sig2_modulus.valid == VALIDITY_VALID))) {
+  }
+  else if (((settings.nca_sig2_private_key.valid == VALIDITY_VALID) &&
+            (settings.nca_sig2_modulus.valid == VALIDITY_INVALID)) ||
+           ((settings.nca_sig2_private_key.valid == VALIDITY_INVALID) &&
+            (settings.nca_sig2_modulus.valid == VALIDITY_VALID)))
+  {
     fprintf(stderr, "Error: Both nca signature 2 private key and public key "
                     "filepaths must be valid\n");
   }
@@ -216,7 +237,8 @@ __declspec(dllexport) _Bool
   nca_create_program(&settings);
 
   // Remove temp directory
-  if (settings.file_type == FILE_TYPE_NCA) {
+  if (settings.file_type == FILE_TYPE_NCA)
+  {
     printf("\n");
     printf("Removing created temp directory\n");
     filepath_remove_directory(&settings.temp_dir);
@@ -229,11 +251,11 @@ __declspec(dllexport) _Bool
 }
 
 __declspec(dllexport) _Bool
-    meta_nca(const char *prodkeys, const char *sdk_version,
-             const char *key_generation, const char *title_id,
-             const char *titleversion, const char *legal_nca,
-             const char *control_nca, const char *htmldoc_nca,
-             const char *program_nca, const char *out_dir) {
+meta_nca(const char *legal_nca, const char *control_nca, const char *htmldoc_nca,
+         const char *program_nca, const char *out_dir, const char *sdk_version,
+         const char *key_generation, const char *title_id,
+         const char *titleversion, const char *prodkeys)
+{
   hp_settings_t settings;
   memset(&settings, 0, sizeof(settings));
 
@@ -305,12 +327,15 @@ __declspec(dllexport) _Bool
     keyfile = os_fopen(keypath.os_path, OS_MODE_READ);
 
   // Try to populate keyfile.
-  if (keyfile != NULL) {
+  if (keyfile != NULL)
+  {
     printf("Loading '%s' keyset file\n", keypath.char_path);
     extkeys_initialize_keyset(&settings.keyset, keyfile);
     pki_derive_keys(&settings.keyset);
     fclose(keyfile);
-  } else {
+  }
+  else
+  {
     printf("\n");
     fprintf(stderr, "Error: Unable to open keyset file\n");
     return EXIT_FAILURE;
@@ -319,7 +344,8 @@ __declspec(dllexport) _Bool
   // SDK Version
   settings.sdk_version = strtoul(sdk_version, NULL, 16);
   // Validating SDK Version
-  if (settings.sdk_version < 0x000B0000) {
+  if (settings.sdk_version < 0x000B0000)
+  {
     fprintf(stderr,
             "Error: Invalid SDK version: %08" PRIX32 "\n"
             "SDK version must be equal or greater than: 000B0000\n",
@@ -330,7 +356,8 @@ __declspec(dllexport) _Bool
   // Keygeneration
   settings.keygeneration = atoi(key_generation);
   // Validating Keygeneration
-  if (settings.keygeneration < 1 || settings.keygeneration > 32) {
+  if (settings.keygeneration < 1 || settings.keygeneration > 32)
+  {
     fprintf(stderr, "Invalid keygeneration: %i, keygeneration range: 1-32\n",
             settings.keygeneration);
     return EXIT_FAILURE;
@@ -341,27 +368,33 @@ __declspec(dllexport) _Bool
 
   // Make sure that header_key exists
   uint8_t has_header_Key = 0;
-  for (unsigned int i = 0; i < 0x10; i++) {
-    if (settings.keyset.header_key[i] != 0) {
+  for (unsigned int i = 0; i < 0x10; i++)
+  {
+    if (settings.keyset.header_key[i] != 0)
+    {
       has_header_Key = 1;
       break;
     }
   }
-  if (has_header_Key == 0) {
+  if (has_header_Key == 0)
+  {
     fprintf(stderr, "Error: header_key is not present in keyset file\n");
     return EXIT_FAILURE;
   }
 
   // Make sure that key_area_key_application_keygen exists
   uint8_t has_kek = 0;
-  for (unsigned int kekc = 0; kekc < 0x10; kekc++) {
+  for (unsigned int kekc = 0; kekc < 0x10; kekc++)
+  {
     if (settings.keyset.key_area_keys[settings.keygeneration - 1][0][kekc] !=
-        0) {
+        0)
+    {
       has_kek = 1;
       break;
     }
   }
-  if (has_kek == 0) {
+  if (has_kek == 0)
+  {
     fprintf(stderr,
             "Error: key_area_key_application for keygeneration %i is not "
             "present in keyset file\n",
@@ -370,15 +403,19 @@ __declspec(dllexport) _Bool
   }
 
   // Make sure that titlekek_keygen exists if titlekey is specified
-  if (settings.has_title_key == 1) {
+  if (settings.has_title_key == 1)
+  {
     uint8_t has_titlekek = 0;
-    for (unsigned int tkekc = 0; tkekc < 0x10; tkekc++) {
-      if (settings.keyset.titlekeks[settings.keygeneration - 1][tkekc] != 0) {
+    for (unsigned int tkekc = 0; tkekc < 0x10; tkekc++)
+    {
+      if (settings.keyset.titlekeks[settings.keygeneration - 1][tkekc] != 0)
+      {
         has_titlekek = 1;
         break;
       }
     }
-    if (has_titlekek == 0) {
+    if (has_titlekek == 0)
+    {
       fprintf(stderr,
               "Error: titlekek for keygeneration %i is not present in keyset "
               "file\n",
@@ -388,7 +425,8 @@ __declspec(dllexport) _Bool
   }
 
   // Make sure that titleid is within valid range
-  if (settings.title_id < 0x0100000000000000) {
+  if (settings.title_id < 0x0100000000000000)
+  {
     fprintf(stderr,
             "Error: Bad TitleID: %016" PRIx64 "\n"
             "Valid TitleID range: 0100000000000000 - ffffffffffffffff\n",
@@ -400,11 +438,13 @@ __declspec(dllexport) _Bool
            settings.title_id);
 
   // Make sure that outout directory is set
-  if (settings.out_dir.valid == VALIDITY_INVALID) {
+  if (settings.out_dir.valid == VALIDITY_INVALID)
+  {
     fprintf(stderr, "Error: Output directory is not specified");
   }
 
-  if (settings.file_type == FILE_TYPE_NCA) {
+  if (settings.file_type == FILE_TYPE_NCA)
+  {
     // Remove existing temp directory and create a new one
     printf("Removing existing temp directory\n");
     filepath_remove_directory(&settings.temp_dir);
@@ -427,28 +467,41 @@ __declspec(dllexport) _Bool
 
   if (settings.cnmt.valid == VALIDITY_VALID)
     nca_create_meta(&settings);
-  else if (settings.title_type == 0) {
+  else if (settings.title_type == 0)
+  {
     fprintf(stderr, "Error: invalid titletype\n");
-  } else if (settings.has_title_key) {
+  }
+  else if (settings.has_title_key)
+  {
     fprintf(stderr, "Error: Titlekey is not supported for metadata nca\n");
-  } else if ((settings.programnca.valid == VALIDITY_INVALID ||
-              settings.controlnca.valid == VALIDITY_INVALID) &&
-             settings.title_type == TITLE_TYPE_APPLICATION) {
+  }
+  else if ((settings.programnca.valid == VALIDITY_INVALID ||
+            settings.controlnca.valid == VALIDITY_INVALID) &&
+           settings.title_type == TITLE_TYPE_APPLICATION)
+  {
     fprintf(stderr, "Error: --programnca and/or --controlnca is not set\n");
-  } else if (settings.title_type == TITLE_TYPE_ADDON &&
-             settings.publicdatanca.valid == VALIDITY_INVALID) {
+  }
+  else if (settings.title_type == TITLE_TYPE_ADDON &&
+           settings.publicdatanca.valid == VALIDITY_INVALID)
+  {
     fprintf(stderr, "Error: --publicdatanca is not set\n");
-  } else if (settings.title_type == TITLE_TYPE_SYSTEMPROGRAM &&
-             settings.programnca.valid == VALIDITY_INVALID) {
+  }
+  else if (settings.title_type == TITLE_TYPE_SYSTEMPROGRAM &&
+           settings.programnca.valid == VALIDITY_INVALID)
+  {
     fprintf(stderr, "Error: --programnca is not set\n");
-  } else if (settings.title_type == TITLE_TYPE_SYSTEMDATA &&
-             settings.datanca.valid == VALIDITY_INVALID) {
+  }
+  else if (settings.title_type == TITLE_TYPE_SYSTEMDATA &&
+           settings.datanca.valid == VALIDITY_INVALID)
+  {
     fprintf(stderr, "Error: --datanca is not set\n");
-  } else
+  }
+  else
     nca_create_meta(&settings);
 
   // Remove temp directory
-  if (settings.file_type == FILE_TYPE_NCA) {
+  if (settings.file_type == FILE_TYPE_NCA)
+  {
     printf("\n");
     printf("Removing created temp directory\n");
     filepath_remove_directory(&settings.temp_dir);
@@ -460,8 +513,8 @@ __declspec(dllexport) _Bool
   return EXIT_SUCCESS;
 }
 
-__declspec(dllexport) _Bool nsp(const char *prodkeys, const char *title_id,
-                                const char *nca_dir, const char *out_dir) {
+__declspec(dllexport) _Bool nsp(const char *nca_dir, const char *out_dir, const char *title_id, const char *prodkeys)
+{
   hp_settings_t settings;
   memset(&settings, 0, sizeof(settings));
 
@@ -518,12 +571,15 @@ __declspec(dllexport) _Bool nsp(const char *prodkeys, const char *title_id,
     keyfile = os_fopen(keypath.os_path, OS_MODE_READ);
 
   // Try to populate keyfile.
-  if (keyfile != NULL) {
+  if (keyfile != NULL)
+  {
     printf("Loading '%s' keyset file\n", keypath.char_path);
     extkeys_initialize_keyset(&settings.keyset, keyfile);
     pki_derive_keys(&settings.keyset);
     fclose(keyfile);
-  } else {
+  }
+  else
+  {
     printf("\n");
     fprintf(stderr, "Error: Unable to open keyset file\n");
     return EXIT_FAILURE;
@@ -534,27 +590,33 @@ __declspec(dllexport) _Bool nsp(const char *prodkeys, const char *title_id,
 
   // Make sure that header_key exists
   uint8_t has_header_Key = 0;
-  for (unsigned int i = 0; i < 0x10; i++) {
-    if (settings.keyset.header_key[i] != 0) {
+  for (unsigned int i = 0; i < 0x10; i++)
+  {
+    if (settings.keyset.header_key[i] != 0)
+    {
       has_header_Key = 1;
       break;
     }
   }
-  if (has_header_Key == 0) {
+  if (has_header_Key == 0)
+  {
     fprintf(stderr, "Error: header_key is not present in keyset file\n");
     return EXIT_FAILURE;
   }
 
   // Make sure that key_area_key_application_keygen exists
   uint8_t has_kek = 0;
-  for (unsigned int kekc = 0; kekc < 0x10; kekc++) {
+  for (unsigned int kekc = 0; kekc < 0x10; kekc++)
+  {
     if (settings.keyset.key_area_keys[settings.keygeneration - 1][0][kekc] !=
-        0) {
+        0)
+    {
       has_kek = 1;
       break;
     }
   }
-  if (has_kek == 0) {
+  if (has_kek == 0)
+  {
     fprintf(stderr,
             "Error: key_area_key_application for keygeneration %i is not "
             "present in keyset file\n",
@@ -563,15 +625,19 @@ __declspec(dllexport) _Bool nsp(const char *prodkeys, const char *title_id,
   }
 
   // Make sure that titlekek_keygen exists if titlekey is specified
-  if (settings.has_title_key == 1) {
+  if (settings.has_title_key == 1)
+  {
     uint8_t has_titlekek = 0;
-    for (unsigned int tkekc = 0; tkekc < 0x10; tkekc++) {
-      if (settings.keyset.titlekeks[settings.keygeneration - 1][tkekc] != 0) {
+    for (unsigned int tkekc = 0; tkekc < 0x10; tkekc++)
+    {
+      if (settings.keyset.titlekeks[settings.keygeneration - 1][tkekc] != 0)
+      {
         has_titlekek = 1;
         break;
       }
     }
-    if (has_titlekek == 0) {
+    if (has_titlekek == 0)
+    {
       fprintf(stderr,
               "Error: titlekek for keygeneration %i is not present in keyset "
               "file\n",
@@ -581,7 +647,8 @@ __declspec(dllexport) _Bool nsp(const char *prodkeys, const char *title_id,
   }
 
   // Make sure that titleid is within valid range
-  if (settings.title_id < 0x0100000000000000) {
+  if (settings.title_id < 0x0100000000000000)
+  {
     fprintf(stderr,
             "Error: Bad TitleID: %016" PRIx64 "\n"
             "Valid TitleID range: 0100000000000000 - ffffffffffffffff\n",
@@ -593,7 +660,8 @@ __declspec(dllexport) _Bool nsp(const char *prodkeys, const char *title_id,
            settings.title_id);
 
   // Make sure that outout directory is set
-  if (settings.out_dir.valid == VALIDITY_INVALID) {
+  if (settings.out_dir.valid == VALIDITY_INVALID)
+  {
     fprintf(stderr, "Error: Output directory is not specified");
   }
 
@@ -603,7 +671,8 @@ __declspec(dllexport) _Bool nsp(const char *prodkeys, const char *title_id,
 
   printf("\n");
 
-  if (settings.ncadir.valid != VALIDITY_INVALID) {
+  if (settings.ncadir.valid != VALIDITY_INVALID)
+  {
     // Create NSP
     printf("----> Creating NSP:\n");
     filepath_t nsp_file_path;
@@ -613,7 +682,9 @@ __declspec(dllexport) _Bool nsp(const char *prodkeys, const char *title_id,
     uint64_t pfs0_size;
     pfs0_build(&settings.ncadir, &nsp_file_path, &pfs0_size);
     printf("\n----> Created NSP: %s\n", nsp_file_path.char_path);
-  } else {
+  }
+  else
+  {
     fprintf(stderr, "Error: --ncadir is not set\n");
   }
 
