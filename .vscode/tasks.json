@@ -1,0 +1,105 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "clean",
+      "type": "shell",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "for /d %d in (*.egg-info) do @rmdir /s /q \"%d\" && if exist dist (rmdir /s /q dist)"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "build hactool",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "-C",
+        "./hactool",
+        "all"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "build hacpack",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "-C",
+        "./hacpack",
+        "all"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "build nxsuite",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "build"
+      ],
+      "dependsOn": [
+        "build hacpack",
+        "build hactool"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "clean and build",
+      "dependsOn": [
+        "clean",
+        "build nxsuite"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "dependsOrder": "sequence"
+    },
+    {
+      "label": "upload",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-m",
+        "twine",
+        "upload",
+        "--repository",
+        "testpypi",
+        "dist/*"
+      ],
+      "dependsOn": [
+        "clean and build",
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+  ]
+}

@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nxsuite"
+version = "0.1.0"
+authors = [{ name = "Vidpic" }]
+description = "NXSuite is a tool for editing various Nintendo Switch file formats."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+]
+
+[project.urls]
+Repository = "https://github.com/Vidpic/nxsuite"
+
+[tool.setuptools.packages.find]
+exclude = ["hactool", "hacpack"]
+include = ["nxsuite"]
+
+[tool.setuptools.package-data]
+"nxsuite" = ["_libs/*.dll"]
+
+
+
