@@ -1,5 +1,5 @@
 # NXSuite
-This package provides functions to edit Nintendo Switch file formats using [hactool](https://github.com/SciresM/hactool) by [SciresM](https://github.com/SciresM) and hackpack by The-4n. Included functions are:
+This package provides functions to edit Nintendo Switch file formats using [hactool](https://github.com/SciresM/hactool) by [SciresM](https://github.com/SciresM) and hacpack by The-4n. Included functions are:
 
 - extract and pack NSP files
 - extract, pack and decrypt NCA files
