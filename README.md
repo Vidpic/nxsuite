@@ -1,11 +1,15 @@
 # NXSuite
-
 This package provides functions to edit Nintendo Switch file formats using [hactool](https://github.com/SciresM/hactool) by [SciresM](https://github.com/SciresM) and hackpack by The-4n. Included functions are:
 
 - extract and pack NSP files
 - extract, pack and decrypt NCA files
 - display informations about NCA file
 - retrieve the titlekey from TIK files
+
+[![PyPI](https://img.shields.io/pypi/v/nxsuite?color=dark-green)](https://pypi.org/project/nxsuite/)
+[![PyPI downloads](https://img.shields.io/pypi/dm/nxsuite?color=dark-green)](https://pypi.org/project/nxsuite/)
+[![GitHub license](https://img.shields.io/github/license/Vidpic/nxsuite?color=orange)](https://github.com/Vidpic/nxsuite/blob/main/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/Vidpic/nxsuite?color=blue)](https://github.com/Vidpic/nxsuite/issues)
 
 ## Installation
 ```
